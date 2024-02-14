@@ -93,5 +93,51 @@ class AdminController extends Controller
             'alert-type'=>'success',
         );
         return redirect()->back()->with($successNotification);
-    }//End Method`
+    }//End Method
+
+    public function BecomeInstructor(){
+        return view('frontend.instructor.reg_instructor');
+    }//End Method
+
+    public function InstructorRegister(Request $request){
+        $request->validate([
+            'name'=>['required','string','max:255'],
+            'email'=>['required','string','unique:users'],
+        ]);
+
+        User::insert([
+            'name'=> $request->name,
+            'username'=>$request->username,
+            'email'=>$request->email,
+            'phone'=>$request->phone,
+            'address'=>$request->address,
+            'password'=>Hash::make($request->password),
+            'role'=>'instructor',
+            'status'=>'0',
+        ]);
+
+        $successNotification=array(
+            'message'=>'Instructor registerd successfully',
+            'alert-type'=>'success',
+        );
+        return redirect()->route('instructor.login')->with($successNotification);
+    }// End Method
+
+    public function AllInstructors(){
+        $allinstructors=User::where('role','instructor')->latest()->get();
+        return view('admin.backend.instructor.all_instructors',compact('allinstructors'));
+    }//End Method
+
+    public function UpdateUserStatus(Request $request){
+        $userId=$request->input('user_id');
+        $isChecked=$request->input('is_checked',0);
+        $user = User::find($userId);
+        if($user){
+            $user->status=$isChecked;
+            $user->save();
+        }
+        return response()->json(['message'=>'Instructor Status Updated Successfully']);
+    }//End Method
+
+
 }
